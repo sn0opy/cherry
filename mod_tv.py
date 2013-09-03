@@ -1,3 +1,6 @@
+# this module looks up the previous and next airdate of a tv show
+# it uses TVRage's XML API to do so
+
 import urllib
 
 trigger = ".tv"
