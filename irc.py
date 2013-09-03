@@ -45,7 +45,7 @@ class IRC(asynchat.async_chat):
 
 	def nick(self, nick):
 		self.nick = nick
-		write(u"NICK " + nick)
+		self.write(u"NICK " + nick)
 
 	def write(self, text):
 		out = text + u"\r\n"
