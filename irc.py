@@ -1,5 +1,3 @@
-#! /usr/bin/pyton3
-
 import socket, sys, re, random
 import asynchat, asyncore
 
