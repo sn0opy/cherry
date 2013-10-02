@@ -10,11 +10,11 @@ trigger = ".hl"
 def irc_cmd(sender, rcpt, msg, sendmsg):
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	s.settimeout(2.0)
-	s.sendto('\xFF\xFF\xFF\xFFTSource Engine Query\0', (HOST, PORT ))
-
+	
 	try:
+		s.sendto('\xFF\xFF\xFF\xFFTSource Engine Query\0', (HOST, PORT ))
 		ret, addr = s.recvfrom(4096)
-	except socket.timeout:
+	except:
 		sendmsg(rcpt, "%s: It seems that the server is currently offline." % sender)
 		return
 
