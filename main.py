@@ -15,7 +15,7 @@ modules = modules.Modules(conn)
 cons = console.Console(conn, modules)
 
 # channels that are to be automatically joined on connection
-conn.addchannel("#Klaus")
+conn.addchannel("#chat")
 
 modules.loadmodules()
 
