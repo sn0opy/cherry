@@ -3,7 +3,7 @@
 
 import urllib
 
-trigger = ".tv"
+trigger = "^\.tv"
 
 try:
 	    import xml.etree.cElementTree as ET
