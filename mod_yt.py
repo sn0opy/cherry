@@ -7,8 +7,14 @@ try:
 except ImportError:
 	import xml.etree.ElementTree as ET
 
+trigger = "(.*)youtube\.([A-Za-z]+)\/watch\?v=([A-Za-z0-9-_]+)(&*)(.*)"
 
-ytre = re.compile(r'(.*)youtube\.([A-Za-z]+)\/watch\?v=([A-Za-z0-9-_]+)(&*)(.*)')
+def irc_cmd(sender, rcpt, msg, sendmsg):
+	id = getytid(msg)
+	if id:
+		info = getinfo(id)
+		if info:
+			sendmsg(rcpt, "\x02title:\x02 " + info[0] +  " [rating: " + info[1] + "]")
 
 def getinfo(id):
 	url = "http://gdata.youtube.com/feeds/api/videos/" + id
@@ -30,10 +36,11 @@ def getinfo(id):
 
 
 def getytid(text):
-	global ytre
+	global trigger
 	retval = None
-
-	result = ytre.search(text)
+	
+	retxt = re.compile(trigger)
+	result = retxt.search(text)
 	if result:
 		try:
 			retval = result.group(3)

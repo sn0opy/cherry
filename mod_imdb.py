@@ -2,7 +2,7 @@
 
 import urllib, json
 
-trigger = ".imdb"
+trigger = "^\.imdb"
 
 def irc_cmd(sender, rcpt, msg, sendmsg):
 	if rcpt == "#game-deception":

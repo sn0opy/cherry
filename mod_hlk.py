@@ -5,7 +5,7 @@ import socket, struct
 HOST = "foo.bar"
 PORT = 27015
 
-trigger = ".hl"
+trigger = "^\.hl"
 
 def irc_cmd(sender, rcpt, msg, sendmsg):
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

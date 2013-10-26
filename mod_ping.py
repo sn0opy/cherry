@@ -1,7 +1,7 @@
 # a simple "ping" module to serve as an example on how to use the plugin architecture
 
 # this trigger will be looked for by the IRC bot
-trigger = ".ping"
+trigger = "^\.ping"
 
 # this is the function that will be executed when triggering off
 

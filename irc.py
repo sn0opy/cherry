@@ -1,9 +1,6 @@
 import socket, sys, re, random
 import asynchat, asyncore
 
-# TODO: make this modular
-import yt
-
 class IRC(asynchat.async_chat):
 
 	def __init__(self, server, port, nick, realname, username):
@@ -126,16 +123,8 @@ class IRC(asynchat.async_chat):
 			if re.match("^((?:\[\s\]\s[^\[\]]+\s?)+)", message) is not None:
 				self.do8ball(sender, recipient, message)
 
-			if yt.getytid(message) is not None:
-				if recipient != "#k" and recipient != "#/dev/null":
-					id = yt.getytid(message)
-					if id:
-						info = yt.getinfo(id)
-						if info:
-							self.privmsg(recipient, "\x02title:\x02 " + info[0] +  " [rating: " + info[1] + "]")
-
 			for c in self.commands:
 				cmdname, cmdfunc = c
-				if message.startswith(cmdname):
+				if re.match(cmdname, message) is not None:
 					cmdfunc(sender, recipient, message, self.privmsg)
 
