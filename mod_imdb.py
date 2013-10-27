@@ -5,9 +5,6 @@ import urllib, json
 trigger = "^\.imdb"
 
 def irc_cmd(sender, rcpt, msg, sendmsg):
-	if rcpt == "#game-deception":
-		return
-
 	global trigger
 
 	arg = msg[len(trigger) + 1:].lstrip()
@@ -25,7 +22,7 @@ def irc_cmd(sender, rcpt, msg, sendmsg):
 				sendmsg(rcpt, "Error: " + result['Error'])
 				return
 
-			out = result['Title']
+			out = "\x0308IMDb\x03: "+ result['Title']
 
 			if 'Year' in result:
 				out += " (" + result['Year'] + ") ::"

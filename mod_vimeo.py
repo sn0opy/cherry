@@ -1,23 +1,23 @@
-# resolves youtube URLs to their title and rating by using the YouTube API
+# resolves Vimeo URLs to their title and rating by using the Vimeo API
 
-import re, urllib
+import re, urllib, datetime
 
 try:
 	import xml.etree.cElementTree as ET
 except ImportError:
 	import xml.etree.ElementTree as ET
 
-trigger = "(.*)youtube\.([A-Za-z]+)\/watch\?v=([A-Za-z0-9-_]+)(&*)(.*)"
+trigger = "(.*)vimeo\.com\/(\d+)"
 
 def irc_cmd(sender, rcpt, msg, sendmsg):
-	id = getytid(msg)
+	id = getid(msg)
 	if id:
 		info = getinfo(id)
 		if info:
-			sendmsg(rcpt, "\x0304You\x0300Tube\x03: " + info[0] +  " | Rating: " + info[1] + " | Uploader: " + info[2])
+			sendmsg(rcpt, "\x0303Vimeo\x03: " + info[0] +  " | Uploader: " + info[1] + " | Likes: " + info[2] + " | Duration: " + info[3])
 
 def getinfo(id):
-	url = "http://gdata.youtube.com/feeds/api/videos/" + id
+	url = "http://vimeo.com/api/v2/video/" + id + '.xml'
 	try:
 		fh = urllib.urlopen(url)
 		root = ET.fromstring(fh.read())
@@ -25,20 +25,23 @@ def getinfo(id):
 			title = "N/A"
 			rating = "0"
 			uploader = "N/A"
-			for child in root:
+			duration = "0s"
+			for child in root[0]:
 				if child.tag.find("title") is not -1:
 					title = child.text
-				if child.tag.find("rating") is not -1:
-					rating = child.attrib['average']
-				if child.tag.find("author") is not -1:
-					uploader = child[0].text
-			return (title, rating[:3], uploader)
+				if child.tag.find("stats_number_of_likes") is not -1:
+					rating = child.text
+				if child.tag.find("user_name") is not -1:
+					uploader = child.text
+				if child.tag.find("duration") is not -1:
+					duration = convertSec(child.text)
+			return (title, uploader, rating, duration)
 		return None
 	except:
 		return None
 
 
-def getytid(text):
+def getid(text):
 	global trigger
 	retval = None
 	
@@ -46,7 +49,7 @@ def getytid(text):
 	result = retxt.search(text)
 	if result:
 		try:
-			retval = result.group(3)
+			retval = result.group(2)
 		except IndexError:
 			retval = None
 	else:

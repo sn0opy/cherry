@@ -6,7 +6,7 @@
 
 # modules can be also be loaded during runtime on the console
 
-modnames = ['mod_hlk', 'mod_imdb', 'mod_ping', 'mod_tv', 'mod_yt']
+modnames = ['mod_hlk', 'mod_imdb', 'mod_ping', 'mod_tv', 'mod_yt', 'mod_vimeo']
 
 class Modules(object):
 	def __init__(self, conn):
