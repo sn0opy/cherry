@@ -1,1 +1,1 @@
-python-oauth2==0.3.0
+TweetPony==1.2.9

@@ -9,6 +9,7 @@ USERNAME = "Cherry"
 
 import threading, time
 import irc, console, modules
+import config as config
 
 conn = irc.IRC(HOST, PORT, NICK, REALNAME, USERNAME)
 modules = modules.Modules(conn)
@@ -17,7 +18,7 @@ cons = console.Console(conn, modules)
 # channels that are to be automatically joined on connection
 conn.addchannel("#Klaus")
 
-modules.loadmodules()
+modules.loadmodules(config)
 
 print("Starting console thread..")
 cons_thread = threading.Thread(target=cons.cmdloop)
