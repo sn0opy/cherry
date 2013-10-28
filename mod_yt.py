@@ -14,7 +14,7 @@ def irc_cmd(sender, rcpt, msg, sendmsg):
 	if id:
 		info = getinfo(id)
 		if info:
-			sendmsg(rcpt, "\x0304You\x0300Tube\x03: " + info[0] +  " | Rating: " + info[1] + " | Uploader: " + info[2])
+			sendmsg(rcpt, "\x0300You\x0304Tube\x03: " + info[0] +  " | Rating: " + info[1] + " | Uploader: " + info[2] + " | Duration: " + info[3])
 
 def getinfo(id):
 	url = "http://gdata.youtube.com/feeds/api/videos/" + id
@@ -25,6 +25,7 @@ def getinfo(id):
 			title = "N/A"
 			rating = "0"
 			uploader = "N/A"
+			duration = "0s"
 			for child in root:
 				if child.tag.find("title") is not -1:
 					title = child.text
@@ -32,7 +33,11 @@ def getinfo(id):
 					rating = child.attrib['average']
 				if child.tag.find("author") is not -1:
 					uploader = child[0].text
-			return (title, rating[:3], uploader)
+				if child.tag.find("group") is not -1:
+					for schild in child:
+						if schild.tag.find("duration") is not -1:
+							duration = convertSec(schild.get("seconds"))
+			return (title, rating[:3], uploader, duration)
 		return None
 	except:
 		return None

@@ -1,6 +1,6 @@
 # resolves Vimeo URLs to their title and rating by using the Vimeo API
 
-import re, urllib, datetime
+import re, urllib
 
 try:
 	import xml.etree.cElementTree as ET
