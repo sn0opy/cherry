@@ -1,11 +1,11 @@
-#! /usr/local/bin/python2.7
+#!/usr/bin/env python2.7
 
 # CONFIGURATION
 HOST = "irc.freenode.net"
 PORT = 6667
-NICK = "Cherryklaus"
-REALNAME = "Cherry"
-USERNAME = "Cherry"
+NICK = "Klaus"
+REALNAME = "Klaus"
+USERNAME = "Klaus"
 
 import threading, time
 import irc, console, modules
@@ -18,7 +18,7 @@ cons = console.Console(conn, modules)
 # channels that are to be automatically joined on connection
 conn.addchannel("#Klaus")
 
-modules.loadmodules(config)
+modules.loadmodules()
 
 print("Starting console thread..")
 cons_thread = threading.Thread(target=cons.cmdloop)
