@@ -12,7 +12,7 @@ except ImportError:
 
 def irc_cmd(sender, rcpt, msg, sendmsg):
 	global trigger
-	arg = msg[len(trigger):].lstrip()
+	arg = msg[len(trigger) - 2:].lstrip()
 
 	if len(arg) > 0:
 		try:
