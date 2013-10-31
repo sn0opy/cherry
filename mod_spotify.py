@@ -15,7 +15,9 @@ def irc_cmd(sender, rcpt, msg, sendmsg):
 		info = getinfo(qry[0], qry[1])
 		if info:
 			albuminfo = " | Album: " + info[3] if qry[1] == "track" else ""
-			out = qry[1].title() + ": " + info[1] + " (" + info[2] + ") | Artist: " + info[0] + albuminfo
+			releasedinfo = " (" + info[2] + ")" if info[2] != "" else ""
+
+			out = qry[1].title() + ": " + info[1] + releasedinfo + " | Artist: " + info[0] + albuminfo
 				
 			sendmsg(rcpt, "\x0303Spotify\x03: " + out)
 
@@ -28,20 +30,22 @@ def getinfo(query, type):
 		if len(root) > 0:
 			artist = ""
 			name = ""
-			released = "N/A"
+			released = ""
 			album = ""		
 
 			for child in root:
 				if child.tag.find("artist") is not -1:
 					for schild in child:
-						artist = schild.text.rstrip()
+						if artist == "":
+							artist = schild.text.rstrip()
 				if child.tag.find("name") is not -1:
 					name = child.text.rstrip()
 				if child.tag.find("released") is not -1:
 					released = child.text
 				if child.tag.find("album") is not -1:
 					for schild in child:
-						album = schild.text.rstrip()
+						if schild.tag.find("name") is not -1:
+							album = schild.text.rstrip()
 
 			return (artist, name, released, album)
 	except:
@@ -63,4 +67,3 @@ def getquery(text):
 		retval = None
 	return retval
 
-print getinfo("6Symp1XeJ6NIyrIiGskNmN", "track")
