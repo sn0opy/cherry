@@ -1,6 +1,7 @@
 # retrieve the Tweet text and a few informations from a given Twitter URL
 
 import re, urllib, tweetpony
+from HTMLParser import HTMLParser
 
 try:
     import xml.etree.cElementTree as ET
@@ -17,10 +18,12 @@ def irc_cmd(sender, rcpt, msg, sendmsg):
 		text = info[1].splitlines()
 
 		for line in text:
+			parser = HTMLParser()
+
 			if(line == text[0]):
-				sendmsg(rcpt, "\x0312Twitter\x03: "+info[0]+": "+line)
+				sendmsg(rcpt, "\x0312Twitter\x03: "+info[0]+": "+parser.unescape(line))
 			else:
-				sendmsg(rcpt, line)
+				sendmsg(rcpt, parser.unescape(line))
 
 
 def getinfo(twid):
@@ -28,16 +31,20 @@ def getinfo(twid):
 	text = ""
 
 	config = __import__('config')
-	api = tweetpony.API(config.consumer_key, config.consumer_secret, config.access_token_key, config.access_token_secret)
-	status = api.get_status(id = twid)
 
-	if status.user.screen_name is not -1:
-		user = "@" +status.user.screen_name
-	if status.text is not -1:
-		text = status.text	
-			
-	return (user, text)
+	try:
+		api = tweetpony.API(config.consumer_key, config.consumer_secret, config.access_token_key, config.access_token_secret)
+		status = api.get_status(id = twid)
+	
+		if status.user.screen_name is not -1:
+			user = "@" +status.user.screen_name
+		if status.text is not -1:
+			text = status.text	
 
+		return (user, text)
+	except Exception:	
+		return ("Error", "Tweet konnte nicht geladen werden.")		
+	
 
 def getid(text):
 	global trigger
