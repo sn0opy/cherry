@@ -1,6 +1,5 @@
 import inspect
 import imp
-import traceback, sys
 
 from irc import IRCConn
 from console import Console
@@ -46,9 +45,7 @@ class Modules():
                 val[1].onprivmsg(conn, sender, to, message)
             except Exception as e:
                 excname = type(e).__name__
-                tb = traceback.extract_tb(sys.exc_info()[2])[-1]
-                print(traceback.extract_tb(sys.exc_info()[2]))
-                print("Error running privmsg() handler in %s [line %i]: %s: %s" % (key, tb[1], excname, str(e)))
+                print("Error running privmsg() handler in %s: %s: %s" % (key, excname, str(e)))
 
 class BaseModule():
     def onprivmsg(self, conn, sender, to, message):
