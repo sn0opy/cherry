@@ -1,58 +1,73 @@
-# this module looks up the previous and next airdate of a tv show
-# it uses TVRage's XML API to do so
-
-import urllib
-
-trigger = "^\.tv"
+import urllib.request
+import urllib.parse
+import modules
+from modules import BaseModule
 
 try:
-	    import xml.etree.cElementTree as ET
+    import xml.etree.cElementTree as ET
 except ImportError:
-	    import xml.etree.ElementTree as ET
+    import xml.etree.ElementTree as ET
 
-def irc_cmd(sender, rcpt, msg, sendmsg):
-	global trigger
-	arg = msg[len(trigger):].lstrip()
+class TVModule(BaseModule):
+    def lookup(self, title):
+        info = {}
 
-	if len(arg) > 0:
-		try:
-			fh = urllib.urlopen("http://services.tvrage.com/feeds/episodeinfo.php?exact=1&show=" + arg)
-		except IOError:
-			sendmsg(rcpt, "Could not connect to TVRage API..")
-			return
+        t = urllib.parse.quote(title)
 
-		try:
-			root = ET.fromstring(fh.read())
-		except ET.ParseError:
-			sendmsg(rcpt, "No results.")
-			return
+        try:
+            fh = urllib.request.urlopen("http://services.tvrage.com/feeds/episodeinfo.php?exact=1&show=" + t)
+            root = ET.fromstring(fh.read())
+        except ET.ParseError:
+            return "No match"
+        except urllib.error.HTTPError:
+            return "HTTP error"
 
-		if len(root) > 0:
-			name = root.find("name").text
+        info["name"] = root.find("name").text
 
-			out = name;
+        if root.find("latestepisode") is not None:
+            lep = root.find("latestepisode")
+            if lep.find("title") is not None:
+                info["title"] = lep.find("title").text
+            if lep.find("number") is not None:
+                info["number"] = lep.find("number").text
+            if lep.find("airdate") is not None:
+                info["airdate"] = lep.find("airdate").text
+        if root.find("nextepisode") is not None:
+            nep = root.find("nextepisode")
+            if nep.find("title") is not None:
+                info["ntitle"] = nep.find("title").text
+            if nep.find("number") is not None:
+                info["nnumber"] = nep.find("number").text
+            if nep.find("airdate") is not None:
+                info["nairdate"] = nep.find("airdate").text
+        return info
 
-			if root.find("latestepisode") is not None:
-				out += " :: Latest Episode: "
-				lep = root.find("latestepisode")
-				
-				if lep.find("title") is not None:
-					out += lep.find("title").text + " "
-				if lep.find("number") is not None:
-					out += "[" + lep.find("number").text + "] "
-				if lep.find("airdate") is not None:
-					out += lep.find("airdate").text
-			if root.find("nextepisode") is not None:
-				out += " :: Next Episode: "
-				nep = root.find("nextepisode")
+    def onprivmsg(self, conn, sender, to, message):
+        arg = self.extractarg(".tv", message)
+        if not arg:
+            return
 
-				if nep.find("title") is not None:
-					out += nep.find("title").text + " "
-				if nep.find("number") is not None:
-					out += "[" + nep.find("number").text + "] "
-				if nep.find("airdate") is not None:
-					out += nep.find("airdate").text
+        def getval(k, r):
+            if k in r: return r[k]
+            else: return "N/A"
 
-			sendmsg(rcpt, "\x02TV:\x02 " + out)
-		else:
-			sendmsg(rcpt, "No results.")
+        res = self.lookup(arg)
+        msg = "No results or no connection."
+        if type(res) is dict:
+            msg = "\x02TV:\x02 "
+            msg += res["name"] + " :: Latest Episode:"
+            msg += " \"" + getval("title", res) + "\""
+            msg += " [" + getval("number", res) + "]"
+            msg += " " + getval("airdate", res)
+
+            if 'ntitle' in res:
+                msg += " :: Next Episode: \"" + getval("ntitle", res) + "\""
+                msg += " [" + getval("nnumber", res) + "]"
+                msg += " " + getval("nairdate", res)
+        elif type(res) is str:
+            msg = res
+
+        if to == conn.nick:
+            conn.privmsg(sender, msg)
+        else:
+            conn.privmsg(to, msg)

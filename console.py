@@ -1,62 +1,71 @@
-# the Console class makes use of Pythons cmd library to offer interaction with the bot
-# during runtime
+from cmd import Cmd
+import sys
 
-import cmd, sys
+class Console(Cmd):
 
-class Console(cmd.Cmd):
-	conn = None
+    def __init__(self, modules, conns):
+        Cmd.__init__(self)
 
-	def __init__(self, conn, modules):
-		cmd.Cmd.__init__(self)
-		self.prompt = "cherry > "
-		self.conn = conn
-		self.modules = modules
+        self.modules = modules
+        self.conns = conns
 
-	def precmd(self, line):
-		line = line.decode("utf-8")
-		return line
+        self.sid = None
+        self.prompt = "cherry () > "
+        self.intro = "welcome to cherry. type \"help\" to list commands.\n"
 
-	def do_EOF(self, line):
-		return True
+    def do_reload(self, line):
+        """reload
+        reloads all external modules"""
+        self.modules.reload()
 
-	def do_load(self, line):
-		"""load [modname]"""
-		if self.modules.load(line):
-			print("success!")
+    def do_join(self, line):
+        """join <channel> [server]
+        joins channel on server (if specified).
+        if server parameter is not set, the command will fallback to the current default server"""
+        args = line.lstrip().split(" ", 1)
+        if len(args) > 1:
+            try:
+                sid = int(args[1])
+                if len(self.conns)-1 >= sid:
+                    self.conns[sid].join(args[0])
+                else:
+                    print("server index invalid")
+            except ValueError:
+                print("invalid server parameter")
+        else:
+            if self.sid is not None:
+                self.conns[self.sid].join(args[0])
+            else:
+                print("no server index set")
 
-	def do_rehash(self, line):
-		"""reloads all modules and registers them"""
-		self.modules.reloadmodules()
+    def do_server(self, line):
+        """server <number>
+        sets the default server to use when executing commands
+        if the argument is empty, it will return the list of servers"""
+        args = line.lstrip().split(" ", 1)
+        if len(args[0]) > 0:
+            try:
+                sid = int(args[0])
+                if len(self.conns)-1 >= sid:
+                    self.sid = sid
+                    self.prompt = "cherry (%i) > " % sid
+                else:
+                    print("invalid server index")
+            except ValueError:
+                print("invalid input")
+        else:
+            for i in range(len(self.conns)):
+                print("%i:\t%s" % (i, self.conns[i].server))
 
-	def do_die(self, line):
-		"""die [reason]"""
-		self.conn.quit(line)
-		return True
 
-	def do_raw(self, line):
-		"""raw <rawcmd>"""
-		self.conn.write(line)
-
-	def do_nick(self, line):
-		"""nick <nickname>"""
-		self.conn.nick(line)
-
-	def do_listen(self, line):
-		"""toggles listen mode"""
-		self.conn.listen = not self.conn.listen
-		print("listen mode is now [%s]" % ("on" if self.conn.listen else "off"))
-
-	def do_join(self, line):
-		"""join <channel>"""
-		self.conn.join(line)
-
-	def do_part(self, line):
-		"""part <channel>"""
-		self.conn.part(line)
-
-	def do_say(self, line):
-		"""say <target> <message>"""
-		args = line.split(u" ", 1)
-		if len(args) > 1:
-			self.conn.privmsg(args[0], args[1])
-
+    def do_exit(self, line):
+        """exit <reason>
+        closes the irc connections with reason as a quit message (if specified)
+        and terminates the bot"""
+        for c in self.conns:
+            print("closing connection: " + c.server)
+            if len(line) > 0:
+                c.quit(line)
+            else:
+                c.quit("bot shutting down")
+        return True

@@ -1,45 +1,48 @@
-# looks up movie titles in the IMDb to display information about that movie
+import urllib
+import json
+from modules import BaseModule
 
-import urllib, json
+class IMDBModule(BaseModule):
+    def onprivmsg(self, conn, sender, to, message):
+        arg = self.extractarg(".imdb", message)
+        if not arg:
+            return
 
-trigger = "^\.imdb"
+        if to == conn.nick:
+            rcpt = sender
+        else:
+            rcpt = to
 
-def irc_cmd(sender, rcpt, msg, sendmsg):
-	if rcpt == "#game-deception":
-		return
+        if len(arg) > 0:
+            try:
+                q = urllib.parse.quote(arg)
+                fh = urllib.request.urlopen("http://www.omdbapi.com/?i=&t=" + q + "&r=json&plot=short")
+            except IOError:
+                conn.privmsg(to, "Could not connect to IMDb API.")
 
-	global trigger
+            try:
+                str_response = fh.read().decode("utf-8")
+                result = json.loads(str_response)
 
-	arg = msg[len(trigger) + 1:].lstrip()
+                if 'Error' in result:
+                    conn.privmsg(rcpt, "Error: " + result['Error'])
+                    return
 
-	if len(arg) > 0:
-		try:
-			fh = urllib.urlopen("http://www.omdbapi.com/?i=&t=" + urllib.quote(arg.encode("utf-8")) + "&r=json&plot=short")
-		except IOError:
-			sendmsg(rcpt, "Could not connect to IMDb API..")
+                out = result['Title']
 
-		try:
-			result = json.loads(fh.read())
+                if 'Year' in result:
+                    out += " (" + result['Year'] + ") ::"
+                out += " http://imdb.com/title/" + result['imdbID'] + " ::"
 
-			if 'Error' in result:
-				sendmsg(rcpt, "Error: " + result['Error'])
-				return
+                if 'Plot' in result:
+                    out += " Plot: " + result['Plot'] + " ::"
+                if 'Genre' in result:
+                    out += " Genre: " + result['Genre'] + " ::"
+                if 'imdbRating' in result:
+                    out += " Rating: " + result['imdbRating']
+                if 'imdbVotes' in result:
+                    out += " (" + result['imdbVotes'] + " votes)"
 
-			out = result['Title']
-
-			if 'Year' in result:
-				out += " (" + result['Year'] + ") ::"
-			out += " http://imdb.com/title/" + result['imdbID'] + " ::"
-
-			if 'Plot' in result:
-				out += " Plot: " + result['Plot'] + " ::"
-			if 'Genre' in result:
-				out += " Genre: " + result['Genre'] + " ::"
-			if 'imdbRating' in result:
-				out += " Rating: " + result['imdbRating']
-			if 'imdbVotes' in result:
-				out += " (" + result['imdbVotes'] + " votes)"
-
-			sendmsg(rcpt, out)
-		except ValueError:
-			sendmsg(rcpt, "Could not parse IMDb output..")
+                conn.privmsg(rcpt, out)
+            except ValueError:
+                conn.privmsg(rcpt, "Could not parse IMDb output..")

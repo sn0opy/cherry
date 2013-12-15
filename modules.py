@@ -1,44 +1,61 @@
-# provides simple support for reloadable modules
+import inspect
+import imp
+import traceback, sys
 
-# modules must have a global variable named "trigger" which contains the trigger
-# as well as a function called "irc_cmd" which is called by the bot when the trigger
-# has been matched
+from irc import IRCConn
+from console import Console
 
-# modules can be also be loaded during runtime on the console
+MODULES = ["mod_tv", "mod_imdb"]
 
-modnames = ['mod_hlk', 'mod_imdb', 'mod_ping', 'mod_tv', 'mod_yt']
+class Modules():
+    # dictionary with modname mapped to (module, obj)
+    modules = {} 
 
-class Modules(object):
-	def __init__(self, conn):
-		global modnames
-		self.mods = {}
-		for n in modnames:
-			self.mods[n] = None
-		self.conn = conn
+    def instantiate(self, m):
+        for attr in dir(m):
+            attr = getattr(m, attr)
+            if(inspect.isclass(attr) and
+                    inspect.getmodule(attr) == m and
+                    issubclass(attr, BaseModule)):
+                return attr()
 
-	def loadmodules(self):
-		for n in self.mods.keys():
-			mod = __import__(n)
-			self.mods[n] = mod
-			self.conn.addcommand((mod.trigger, mod.irc_cmd))
+    def __init__(self):
+        global MODULES
+        for s in MODULES:
+            try:
+                m = __import__(s)
+                print("Loaded %s .." % s)
+            except Exception as e:
+                print("Could not load module %s: %s" % (s, str(e)))
+                continue
+            self.modules[s] = (m, self.instantiate(m))
 
-	def reloadmodules(self):
-		self.conn.clearcommands()
-		for k, v in self.mods.iteritems():
-			print("reloading " + k + "..")
-			reload(v)
-			self.conn.addcommand((v.trigger, v.irc_cmd))
+    def reload(self):
+        for key, val in self.modules.items():
+            print("Reloading %s .." % (key))
+            try:
+                reloadedmod = imp.reload(val[0])
+                newinstance = self.instantiate(reloadedmod)
+                self.modules[key] = (reloadedmod, newinstance)
+            except Exception as e:
+                print("Could not reload module %s: %s" (key, str(e)))
 
-	def load(self, name):
-		if name in self.mods:
-			return False
+    def onprivmsg(self, conn, sender, to, message):
+        for key, val in self.modules.items():
+            try:
+                val[1].onprivmsg(conn, sender, to, message)
+            except Exception as e:
+                excname = type(e).__name__
+                tb = traceback.extract_tb(sys.exc_info()[2])[-1]
+                print(traceback.extract_tb(sys.exc_info()[2]))
+                print("Error running privmsg() handler in %s [line %i]: %s: %s" % (key, tb[1], excname, str(e)))
 
-		try:
-			mod = __import__(name)
-		except ImportError as e:
-			print("Could not load module: " + e.args[0])
-			return False
+class BaseModule():
+    def onprivmsg(self, conn, sender, to, message):
+        pass
 
-		self.mods[name] = mod
-		self.conn.addcommand((mod.trigger, mod.irc_cmd))
-		return True
+    def extractarg(self, trigger, message):
+        if message.startswith(trigger):
+            _, arg = message.split(trigger, 1)
+            return arg.lstrip()
+        return None

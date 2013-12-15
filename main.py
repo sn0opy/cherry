@@ -1,34 +1,29 @@
-#! /usr/local/bin/python2.7
+#! /usr/bin/env python3
+from threading import Thread
+import asyncore
 
-# CONFIGURATION
-HOST = "irc.freenode.net"
-PORT = 6667
-NICK = "Cherry"
-REALNAME = "Cherry"
-USERNAME = "Cherry"
+from irc import IRCConn
+import console
+import modules
 
-import threading, time
-import irc, console, modules
+# Set up modules
+mods = modules.Modules()
 
-conn = irc.IRC(HOST, PORT, NICK, REALNAME, USERNAME)
-modules = modules.Modules(conn)
-cons = console.Console(conn, modules)
+# Set up connections
+freenode = IRCConn("irc.freenode.net", 6667, "henrikbot", "henriks bot", "botbot", mods)
+freenode.start()
 
-# channels that are to be automatically joined on connection
-conn.addchannel("#chat")
+# array of server connections
+conns = [freenode]
 
-modules.loadmodules()
+# Set up console
+console = console.Console(mods, conns)
+console_thread = Thread(target=console.cmdloop)
+console_thread.start()
 
-print("Starting console thread..")
-cons_thread = threading.Thread(target=cons.cmdloop)
-cons_thread.start()
-print("Starting connection loop..")
-
-conn.start()
-
-while conn.active:
-	print("Disconnected! Reconnecting in 5 seconds..")
-	time.sleep(5)
-	conn.start()
-
-print("Closing up!")
+# Enter I/O loop
+try:
+    asyncore.loop()
+except KeyboardInterrupt:
+    print("CTRL+C pressed.\n")
+    asyncore.close_all()
