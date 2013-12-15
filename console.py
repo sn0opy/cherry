@@ -18,6 +18,15 @@ class Console(Cmd):
         reloads all external modules"""
         self.modules.reload()
 
+    def do_load(self, line):
+        """load <name>
+        attempts to load the module with specified name"""
+        arg = line.strip()
+        if len(arg) > 0:
+            self.modules.load(line)
+        else:
+            print("no name specified")
+
     def do_join(self, line):
         """join <channel> [server]
         joins channel on server (if specified).

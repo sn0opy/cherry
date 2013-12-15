@@ -21,13 +21,15 @@ class Modules():
     def __init__(self):
         global MODULES
         for s in MODULES:
-            try:
-                m = __import__(s)
-                print("Loaded %s .." % s)
-            except Exception as e:
-                print("Could not load module %s: %s" % (s, str(e)))
-                continue
-            self.modules[s] = (m, self.instantiate(m))
+            self.load(s)
+
+    def load(self, name):
+        try:
+            m = __import__(name)
+            self.modules[name] = (m, self.instantiate(m))
+            print("Loaded %s." % name)
+        except Exception as e:
+            print("Could not load module %s: %s" % (s, str(e)))
 
     def reload(self):
         for key, val in self.modules.items():
