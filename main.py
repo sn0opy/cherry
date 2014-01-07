@@ -16,6 +16,8 @@ for c in config.connections:
     i = IRCConn(c['server'], c['port'], c['nick'], c['realname'], c['username'], mods)
     if 'nspw' in c:
         i.setnspw(c['nspw'])
+    if 'channels' in c:
+        i.setautojoin(c['channels'])
     i.start()
     conns.append(i)
 
