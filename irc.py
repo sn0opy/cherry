@@ -12,6 +12,8 @@ class IRCConn(asynchat.async_chat):
         self.realname = realname
         self.username = username
         self.mods = mods
+        self.channels = []
+        self.nickservpw = None
         self.active = True
 
         self.buffer = []
@@ -20,6 +22,12 @@ class IRCConn(asynchat.async_chat):
     def start(self):
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         asynchat.async_chat.connect(self, (self.server, self.port))
+
+    def setnspw(self, password):
+        self.nickservpw = password
+
+    def setautojoin(self, channels):
+        self.channels = channels
 
     def write(self, text):
         out = text + "\r\n"
@@ -48,7 +56,11 @@ class IRCConn(asynchat.async_chat):
 
         if line[0] == "PING":
             self.write("PONG " + line[1][1:])
-        #elif len(line) > 1 and line[1] == "001": # we are connected
+        elif len(line) > 1 and line[1] == "001": # we are connected
+            if self.nickservpw:
+                self.privmsg("nickserv", "identify " + self.nickservpw)
+            for c in self.channels:
+                self.join(c)
         elif len(line) > 1 and line[1] == "PRIVMSG":
             sender = line[0][1:line[0].find("!")]
             message = line[3][1:]
