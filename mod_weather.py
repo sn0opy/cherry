@@ -92,6 +92,9 @@ class WeatherMod(BaseModule):
 
 
     def onprivmsg(self, conn, sender, to, message):
+        if not message.lstrip().startswith(".weather")
+            return
+
         result = sender + ": usage: .weather <location> (will be saved after first call and then used for future requests made by you)"
 
         if to == conn.nick:
