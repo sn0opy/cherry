@@ -29,7 +29,7 @@ class Modules():
             self.modules[name] = (m, self.instantiate(m))
             print("Loaded %s." % name)
         except Exception as e:
-            print("Could not load module %s: %s" % (s, str(e)))
+            print("Could not load module %s: %s" % (name, str(e)))
 
     def reload(self):
         for key, val in self.modules.items():
