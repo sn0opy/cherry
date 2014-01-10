@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 
 # CONFIGURATION
-HOST = "irc.freenode.net"
+HOST = "chat.freenode.net"
 PORT = 6667
 NICK = "Klaus"
 REALNAME = "Klaus"

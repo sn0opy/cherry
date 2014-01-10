@@ -7,7 +7,7 @@ try:
 except ImportError:
 	import xml.etree.ElementTree as ET
 
-trigger = "(.*)youtube\.([A-Za-z]+)\/watch\?v=([A-Za-z0-9-_]+)(&*)(.*)"
+trigger = "(.*)(youtu\.be|youtube\.([A-Za-z]+))\/watch\?v=([A-Za-z0-9-_]+)(&*)(.*)"
 
 def irc_cmd(sender, rcpt, msg, sendmsg):
 	id = getytid(msg)
