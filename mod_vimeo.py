@@ -7,16 +7,16 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-class YTModule(BaseModule):
+class VimeoModule(BaseModule):
 	def __init__(self):
-		self.ytre = re.compile(r'(.*)youtube\.([A-Za-z]+)\/watch\?v=([A-Za-z0-9-_]+)(&*)(.*)')
+		self.vmre = re.compile(r'(.*)vimeo\.com\/(\d+)')
 
 	def getytid(self, text):
 		retval = None
-		s = self.ytre.search(text)
+		s = self.vmre.search(text)
 		if s:
 			try:
-				retval = s.group(3)
+				retval = s.group(2)
 			except IndexError:
 				retval = None
 		return retval
@@ -37,28 +37,26 @@ class YTModule(BaseModule):
 		return str(out)
 
 	def getinfo(self, id):
-		url = "http://gdata.youtube.com/feeds/api/videos/" + id
+		url = "http://vimeo.com/api/v2/video/" + id + '.xml'
 		try:
 			fh = urllib.request.urlopen(url)
 			root = ET.fromstring(fh.read())
 			if len(root) > 0:
 				title = "N/A"
-				rating = "\u221E"
+				rating = "0"
 				uploader = "N/A"
 				duration = "0s"
-				for child in root:
+				for child in root[0]:
 					if child.tag.find("title") is not -1:
 						title = child.text
-					if child.tag.find("rating") is not -1:
-						rating = child.attrib['average']
-					if child.tag.find("author") is not -1:
-						uploader = child[0].text
-					if child.tag.find("group") is not -1:
-						for schild in child:
-							if schild.tag.find("duration") is not -1:
-								duration = self.convertSec(schild.get("seconds"))
+					if child.tag.find("stats_number_of_likes") is not -1:
+						rating = child.text
+					if child.tag.find("user_name") is not -1:
+						uploader = child.text
+					if child.tag.find("duration") is not -1:
+						duration = self.convertSec(child.text)
 				
-				return (title, rating[:3], uploader, duration)
+				return (title, uploader, rating, duration)
 			return None
 		except:
 			pass
@@ -67,7 +65,6 @@ class YTModule(BaseModule):
 	def onprivmsg(self, conn, sender, to, message):
 		ytid = self.getytid(message)
 		if ytid is not None:
-			if to != "#k" and to != "#/dev/null":
-				info = self.getinfo(ytid)
-				if info:
-					conn.privmsg(to, "\x0300You\x0304Tube\x03: " + info[0] +  " | Rating: " + info[1] + " | Uploader: " + info[2] + " | Duration: " + info[3])
+			info = self.getinfo(ytid)
+			if info:
+				conn.privmsg(to, "\x0303Vimeo\x03: " + info[0] +  " | Uploader: " + info[1] + " | Likes: " + info[2] + " | Duration: " + info[3])

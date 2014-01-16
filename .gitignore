@@ -1,6 +1,7 @@
 *.py[cod]
 config.conf
-
+config.py
+mod_ewather.db
 # C extensions
 *.so
 
