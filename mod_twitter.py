@@ -1,7 +1,7 @@
 import re, urllib, tweetpony
 import html.parser
 from modules import BaseModule
-import config
+import twitter
 
 class TwitterModule(BaseModule):
 	def __init__(self):
@@ -12,7 +12,7 @@ class TwitterModule(BaseModule):
 		text = ""
 		
 		try:
-			api = tweetpony.API(config.twitter['consumer_key'], config.twitter['consumer_secret'], config.twitter['access_token_key'], config.twitter['access_token_secret'])
+			api = tweetpony.API(twitter.api['consumer_key'], twitter.api['consumer_secret'], twitter.api['access_token_key'], twitter.api['access_token_secret'])
 			status = api.get_status(id = twid)
 		
 			if status.user.screen_name is not -1:
@@ -44,6 +44,6 @@ class TwitterModule(BaseModule):
 			text = info[1].splitlines()
 			for line in text:
 				if line is text[0]:
-					conn.privmsg(to, "\x0312Twitter\x03: "+text[0]+": "+line)
+					conn.privmsg(to, "\x0312Twitter\x03: "+info[0]+": "+line)
 				else:
 					conn.privmsg(to, line)

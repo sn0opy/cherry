@@ -1,7 +1,8 @@
 *.py[cod]
 config.conf
 config.py
-mod_ewather.db
+mod_weather.db
+twitter.py
 # C extensions
 *.so
 
