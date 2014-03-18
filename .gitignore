@@ -3,6 +3,7 @@ config.conf
 config.py
 mod_weather.db
 twitter.py
+wolfram.py
 # C extensions
 *.so
 

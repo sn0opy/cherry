@@ -44,8 +44,6 @@ class TVModule(BaseModule):
 
     def onprivmsg(self, conn, sender, to, message):
         arg = self.extractarg(".tv", message)
-        if not arg:
-            return
 
         def getval(k, r):
             if k in r: return r[k]
