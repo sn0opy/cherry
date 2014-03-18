@@ -23,12 +23,13 @@ class VimeoModule(BaseModule):
 		return retval
 
 	def getTitle(self, url):
-		r = requests.get(url).text
-		return html.fromstring(r).xpath('//title/text()')
+		r = requests.get(url)
+		r.encoding = "UTF-8"
+		return html.fromstring(r.text).xpath('//title/text()')
 
 	def onprivmsg(self, conn, sender, to, message):
 		url = self.geturl(message)
 		if url is not None:
 			info = self.getTitle(url)
 			if info:
-				conn.privmsg(to, "Title: " + info[0])
+				conn.privmsg(to, "Title: " + info[0][0:100])
