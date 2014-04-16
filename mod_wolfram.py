@@ -15,8 +15,6 @@ class WAModule(BaseModule):
     def lookup(self, term):
         term_quoted = urllib.parse.quote(term)
 
-        out = "\0x0304W\0x0308A\0x03"
-
         try:
             fh = urllib.request.urlopen(self.url + term_quoted)
             root = ET.fromstring(fh.read())
@@ -27,7 +25,8 @@ class WAModule(BaseModule):
 
         if root.attrib['success']:
             pods = 2 if int(root.attrib['numpods']) > 1 else 1
-
+            
+            out = ""
             for pod in root[:pods]:
                 out += " | "
                 if 'title' in pod.attrib:
@@ -45,6 +44,8 @@ class WAModule(BaseModule):
         return out[:508] + ".." if len(out) > 508 else out
 
     def onprivmsg(self, conn, sender, to, message):
+        if not message.lstrip().startswith(".wa"):
+            return
         arg = self.extractarg(".wa", message)
         
         if to == conn.nick:
@@ -52,8 +53,8 @@ class WAModule(BaseModule):
         else:
             rcpt = to
 
-        if len(arg) > 0:
+        if arg is not None and len(arg) > 0:
             response = self.lookup(arg)
-            conn.privmsg(rcpt, response)
+            conn.privmsg(rcpt, "\x0304Wolfram\x0307Alpha\x03:" + response)
         else:
             conn.privmsg(rcpt, "usage: .wa <question>")

@@ -13,7 +13,7 @@ class VimeoModule(BaseModule):
 			try:
 				o = urlparse(u)
 				if o.scheme is not None:
-					exclude = ['www.youtube.com', 'youtube.com', 'vimeo.com', 'twitter.com', 'open.spotify.com']
+					exclude = ['www.youtube.com', 'youtube.com', 'vimeo.com', 'twitter.com', 'open.spotify.com', 'play.spotify.com']
 					if o.netloc in exclude:
 						retval = None
 					else:

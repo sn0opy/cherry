@@ -43,6 +43,8 @@ class TVModule(BaseModule):
         return info
 
     def onprivmsg(self, conn, sender, to, message):
+        if not message.lstrip().startswith(".tv"):
+            return
         arg = self.extractarg(".tv", message)
 
         def getval(k, r):
