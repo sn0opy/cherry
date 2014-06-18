@@ -24,7 +24,7 @@ class YTModule(BaseModule):
 	def convertSec(self, sec):
 		m, s = divmod(int(sec), 60)
 		h, m  = divmod(m, 60)
-		
+
 		if s > 0:
 			out = str(s)+"s"
 		else:
@@ -33,7 +33,7 @@ class YTModule(BaseModule):
 			out = str(m)+"m "+out
 		if h > 0:
 			out = str(h)+"h "+out
-		
+
 		return str(out)
 
 	def getinfo(self, id):
@@ -57,7 +57,7 @@ class YTModule(BaseModule):
 						for schild in child:
 							if schild.tag.find("duration") is not -1:
 								duration = self.convertSec(schild.get("seconds"))
-				
+
 				return (title, rating[:3], uploader, duration)
 			return None
 		except:

@@ -24,7 +24,7 @@ class VimeoModule(BaseModule):
 	def convertSec(self, sec):
 		m, s = divmod(int(sec), 60)
 		h, m  = divmod(m, 60)
-		
+
 		if s > 0:
 			out = str(s)+"s"
 		else:
@@ -33,7 +33,7 @@ class VimeoModule(BaseModule):
 			out = str(m)+"m "+out
 		if h > 0:
 			out = str(h)+"h "+out
-		
+
 		return str(out)
 
 	def getinfo(self, id):
@@ -55,7 +55,7 @@ class VimeoModule(BaseModule):
 						uploader = child.text
 					if child.tag.find("duration") is not -1:
 						duration = self.convertSec(child.text)
-				
+
 				return (title, uploader, rating, duration)
 			return None
 		except:

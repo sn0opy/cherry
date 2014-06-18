@@ -1,47 +1,39 @@
-import re, urllib
+import re
+import urllib.request
+import json
 from modules import BaseModule
-
-try:
-	import xml.etree.cElementTree as ET
-except ImportError:
-	import xml.etree.ElementTree as ET
 
 class SpotifyMod(BaseModule):
 	def __init__(self):
 		self.spotifyre = re.compile(r'(.*)(?!spotify\:|http(?!s))\:\/\/[a-z]+\.spotify\.com\/(track|artist|album)(?:\:|\/)([a-zA-Z0-9]+)')
 
 	def getinfo(self, query, type):
-		url = "http://ws.spotify.com/lookup/1/?uri=spotify:" + type + ":" + query
-		try:
-			fh = urllib.request.urlopen(url)
-			root = ET.fromstring(fh.read())
-			if len(root) > 0:
-				artist = ""
-				name = ""
-				released = ""
-				album = ""		
-	
-				for child in root:
-					if child.tag.find("artist") is not -1:
-						for schild in child:
-							if artist == "":
-								artist = schild.text.rstrip()
-					if child.tag.find("name") is not -1:
-						name = child.text.rstrip()
-					if child.tag.find("released") is not -1:
-						released = child.text
-					if child.tag.find("album") is not -1:
-						for schild in child:
-							if schild.tag.find("name") is not -1:
-								album = schild.text.rstrip()
-	
-				return (artist, name, released, album)
-		except:
-			return None
+		url = "https://api.spotify.com/v1/" + type + "s/" + query
+		fh = urllib.request.urlopen(url)
+		json_data = json.loads(fh.read().decode("utf-8"))
+
+		artist = ""
+		name = ""
+		released = ""
+		album = ""
+
+		if 'artists' in json_data:
+			artist = json_data['artists'][0]['name']
+
+		if 'name' in json_data:
+			name = json_data['name']
+
+		if 'album' in json_data:
+			album = json_data['album']['name']
+
+		if 'release_date' in json_data:
+			released = json_data['release_date']
+
+		return (type, artist, name, album, released)
 
 	def getquery(self, text):
 		retval = None
-		
+
 		result = self.spotifyre.search(text)
 		if result:
 			try:
@@ -51,15 +43,18 @@ class SpotifyMod(BaseModule):
 		return retval
 
 	def onprivmsg(self, conn, sender, to, message):
-	    qry = self.getquery(message)
-	    if qry is not None:
-	        info = self.getinfo(qry[0], qry[1])
-	        if info:
-	            albuminfo = " | Album: " + info[3] if qry[1] == "track" else ""
-	            releasedinfo = " (" + info[2] + ")" if info[2] != "" else ""
-	
-	            out = qry[1].title() + ": " + info[1] + releasedinfo + " | Artist: " + info[0] + albuminfo
-	
-	            conn.privmsg(to, "\x0303Spotify\x03: " + out)
+		qry = self.getquery(message)
+		if qry is not None:
+			info = self.getinfo(qry[0], qry[1])
+			out = "Keine Info verfügbar"
+			if info:
+				if info[0] == "track":
+					out = "Track: " + info[2] + " | Artist: " + info[1] + " | Album: " + info[3]
 
+				if info[0] == "album":
+					out = "Album: " + info[2] + " | Artist: " + info[1] + " | Released : " + info[4]
 
+				if info[0] == "artist":
+					out = "Artist: " + info[2]
+
+			conn.privmsg(to, "\x0303Spotify\x03: " + out)

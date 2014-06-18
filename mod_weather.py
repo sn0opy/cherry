@@ -31,7 +31,7 @@ class WeatherMod(BaseModule):
             retval = c.fetchone()[0]
         except:
             pass
-        
+
         self.disconnect()
         return retval
 

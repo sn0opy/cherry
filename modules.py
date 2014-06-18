@@ -8,7 +8,7 @@ MODULES = ["mod_imdb", "mod_yt", "mod_weather", "mod_spotify", "mod_vimeo", "mod
 
 class Modules():
     # dictionary with modname mapped to (module, obj)
-    modules = {} 
+    modules = {}
 
     def instantiate(self, m):
         for attr in dir(m):

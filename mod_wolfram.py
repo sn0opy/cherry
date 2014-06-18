@@ -25,7 +25,7 @@ class WAModule(BaseModule):
 
         if root.attrib['success']:
             pods = 2 if int(root.attrib['numpods']) > 1 else 1
-            
+
             out = ""
             for pod in root[:pods]:
                 out += " | "
@@ -47,7 +47,7 @@ class WAModule(BaseModule):
         if not message.lstrip().startswith(".wa"):
             return
         arg = self.extractarg(".wa", message)
-        
+
         if to == conn.nick:
             rcpt = sender
         else:

@@ -10,18 +10,18 @@ class TwitterModule(BaseModule):
 	def getinfo(self, twid):
 		user = "N/A"
 		text = ""
-		
+
 		try:
 			api = tweetpony.API(twitter.api['consumer_key'], twitter.api['consumer_secret'], twitter.api['access_token_key'], twitter.api['access_token_secret'])
 			status = api.get_status(id = twid)
-		
+
 			if status.user.screen_name is not -1:
 				user = "@" +status.user.screen_name
 			if status.text is not -1:
-				text = status.text	
+				text = status.text
 				return (user, text)
-		except Exception as err:	
-			return("Error", "Konnte Daten nicht abrufen")	
+		except Exception as err:
+			return("Error", "Konnte Daten nicht abrufen")
 
 	def getid(self, text):
 		global trigger
@@ -34,8 +34,8 @@ class TwitterModule(BaseModule):
 				retval = None
 		else:
 			retval = None
-			
-		return retval	
+
+		return retval
 
 	def onprivmsg(self, conn, sender, to, message):
 		id = self.getid(message)
