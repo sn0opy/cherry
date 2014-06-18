@@ -23,7 +23,7 @@ class VimeoModule(BaseModule):
 		return retval
 
 	def getTitle(self, url):
-		r = requests.get(url)
+		r = requests.get(url, headers = { 'User-Agent' : 'Cherry IRC Bot' })
 		r.encoding = "UTF-8"
 		return html.fromstring(r.text).xpath('//title/text()')
 
