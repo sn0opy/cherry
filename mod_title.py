@@ -4,7 +4,8 @@ from lxml import html
 from urllib.parse import urlparse
 from modules import BaseModule
 
-class VimeoModule(BaseModule):
+class TitleModule(BaseModule):
+	exclude_sites = ['www.youtube.com', 'youtube.com', 'vimeo.com', 'twitter.com', 'open.spotify.com', 'play.spotify.com']
 	def geturl(self, text):
 		retval = None
 		u = re.search("(?P<url>https?://[^\s]+)", text)
@@ -13,8 +14,7 @@ class VimeoModule(BaseModule):
 			try:
 				o = urlparse(u)
 				if o.scheme is not None:
-					exclude = ['www.youtube.com', 'youtube.com', 'vimeo.com', 'twitter.com', 'open.spotify.com', 'play.spotify.com']
-					if o.netloc in exclude:
+					if o.netloc in self.exclude_sites:
 						retval = None
 					else:
 						retval = u
@@ -32,4 +32,5 @@ class VimeoModule(BaseModule):
 		if url is not None:
 			info = self.getTitle(url)
 			if info:
-				conn.privmsg(to, "Title: " + info[0][0:100])
+				title = info[0][0:100].lstrip().rstrip()
+				conn.privmsg(to, "Title: " + title)
