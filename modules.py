@@ -4,7 +4,7 @@ import imp
 from irc import IRCConn
 from console import Console
 
-MODULES = ["mod_imdb", "mod_yt", "mod_weather", "mod_spotify", "mod_vimeo", "mod_twitter", "mod_title", "mod_wolfram", "mod_tv"]
+MODULES = ["mod_imdb", "mod_yt", "mod_weather", "mod_spotify", "mod_vimeo", "mod_twitter", "mod_title", "mod_wolfram", "mod_tv", "mod_timer"]
 
 class Modules():
     # dictionary with modname mapped to (module, obj)
