@@ -9,14 +9,17 @@ except ImportError:
 
 class YTModule(BaseModule):
 	def __init__(self):
-		self.ytre = re.compile(r'(.*)youtube\.([A-Za-z]+)\/watch\?v=([A-Za-z0-9-_]+)(&*)(.*)')
+		self.ytre = re.compile(r'(?:youtube\.(?:[A-Za-z]+)\/watch\?v=([A-Za-z0-9-_]+)|youtu\.be\/([A-Za-z0-9-_]+))')
 
 	def getytid(self, text):
 		retval = None
 		s = self.ytre.search(text)
 		if s:
 			try:
-				retval = s.group(3)
+				if(s.group(1) is None):
+					retval = s.group(2)
+				else:
+					retval = s.group(1)
 			except IndexError:
 				retval = None
 		return retval

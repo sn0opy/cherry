@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from modules import BaseModule
 
 class TitleModule(BaseModule):
-	exclude_sites = ['www.youtube.com', 'youtube.com', 'vimeo.com', 'twitter.com', 'open.spotify.com', 'play.spotify.com']
+	exclude_sites = ['www.youtube.com', 'youtu.be', 'youtube.com', 'vimeo.com', 'twitter.com', 'open.spotify.com', 'play.spotify.com']
 	def geturl(self, text):
 		retval = None
 		u = re.search("(?P<url>https?://[^\s]+)", text)
